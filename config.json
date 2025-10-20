@@ -1,0 +1,4 @@
+{
+    "duracionCicloMs": 1000,
+    "politica": "FCFS"
+}
