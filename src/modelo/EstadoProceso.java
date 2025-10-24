@@ -8,6 +8,11 @@ package modelo;
  *
  * @author 58412
  */
-public class EstadoProceso {
-    
+public enum EstadoProceso {
+    NUEVO,
+    LISTO,
+    EJECUCION,
+    BLOQUEADO,
+    SUSPENDIDO,
+    TERMINADO 
 }
