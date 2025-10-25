@@ -37,14 +37,13 @@ public class ColaBloqueados {
         } finally { lock.unlock(); }
     }
 
-    public boolean estaVacia() {
+    public boolean esVacia() {
         lock.lock();
         try { return size == 0; } finally { lock.unlock(); }
     }
 
-    public int size() {
-        lock.lock();
-        try { return size; } finally { lock.unlock(); }
+    public int getSize() {
+        return size;
     }
 
     public Proceso[] avanzarUnCicloYLiberar() {
