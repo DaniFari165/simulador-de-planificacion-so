@@ -121,11 +121,11 @@ public class Kernel {
     public void setPlanificadorSRTF() {
         this.planificador = new SRTF();
     }
-    public void setPlanificadorPrioridadNP() {
-        this.planificador = new PrioridadNP();
+    public void setPlanificadorHRRN() {
+        this.planificador = new HRRN();
     }
-    public void setPlanificadorPrioridadP() {
-        this.planificador = new PrioridadP();
+    public void setPlanificadorFeedback() {
+        this.planificador = new Feedback();
     }
     public String nombrePlanificador() {
         return planificador.name();
