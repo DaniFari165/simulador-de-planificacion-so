@@ -115,10 +115,10 @@ public class Kernel {
     public void setPlanificadorRR(int quantum) {
         this.planificador = new RoundRobin(quantum);
     }
-    public void setPlanificadorSJF() {
+    public void setPlanificadorSPN() {
         this.planificador = new SPN();
     }
-    public void setPlanificadorSRTF() {
+    public void setPlanificadorSRT() {
         this.planificador = new SRT();
     }
     public void setPlanificadorHRRN() {
