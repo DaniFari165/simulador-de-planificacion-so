@@ -4,10 +4,13 @@
  */
 package planificador;
 
+import control.Kernel;
+
 /**
  *
  * @author 58412
  */
-public class Scheduler {
-    
+public interface Scheduler {
+    void onTick(Kernel k);
+    String name();
 }

@@ -4,10 +4,21 @@
  */
 package planificador;
 
+import control.Kernel;
+import modelo.ProcesoEvento;
+
 /**
  *
  * @author 58412
  */
-public class FCFS {
-    
+public class FCFS implements Scheduler {
+    public void onTick(Kernel k) {
+        if (k.cpuLibre() && !k.listosVacio()) k.asignarCPU(k.desencolarListo());
+        ProcesoEvento ev = k.ejecutarCPU();
+        k.manejarEvento(ev);
+        k.liberarBloqueadosAListos();
+    }
+    public String name() {
+        return "FCFS";
+    }
 }
