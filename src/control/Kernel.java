@@ -116,10 +116,10 @@ public class Kernel {
         this.planificador = new RoundRobin(quantum);
     }
     public void setPlanificadorSJF() {
-        this.planificador = new SJF();
+        this.planificador = new SPN();
     }
     public void setPlanificadorSRTF() {
-        this.planificador = new SRTF();
+        this.planificador = new SRT();
     }
     public void setPlanificadorHRRN() {
         this.planificador = new HRRN();
