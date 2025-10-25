@@ -18,7 +18,7 @@ public class ProcesoEvento {
 
     private Tipo tipo;
     private Proceso proceso;
-    private int ioEsperaCiclos; // solo si BLOQUEADO
+    private int ioEsperaCiclos;
 
     public ProcesoEvento(Tipo tipo, Proceso proceso, int ioEsperaCiclos) {
         this.tipo = tipo;
