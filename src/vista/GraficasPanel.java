@@ -9,7 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 /**
  *
- * @author 58412
+ * @author Daniel Fariña
  */
 public final class GraficasPanel extends JPanel {
     private final Kernel kernel;

@@ -8,7 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 /**
  *
- * @author 58412
+ * @author Daniel Fariña
  */
 public final class PlotLinePanel extends JPanel {
     private String titulo;
