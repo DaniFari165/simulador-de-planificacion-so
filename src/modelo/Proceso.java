@@ -154,11 +154,19 @@ public class Proceso extends Thread{
         return mar; 
     }
 
-    public void setIoCada(int v) { 
+    public int getIoEntry() {
+        return ioEntry;
+    }
+
+    public int getIoService() {
+        return ioService;
+    }
+    
+    public void setIoEntry(int v) { 
         this.ioEntry = Math.max(0, v); 
     }
     
-    public void setIoServicio(int v) { 
+    public void setIoService(int v) { 
         this.ioService = Math.max(0, v); 
     }
 

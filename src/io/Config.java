@@ -23,7 +23,7 @@ public final class Config {
     public static String POLITICA = "FCFS";
     public static int UI_REFRESH_MS = 200;
 
-    public static String PROCESOS_CSV = "config/procesos.csv";
+    public static String PROCESOS_JSON = "config/procesos.json";
 
     private static String rutaConfig() {
         String home = System.getProperty("user.home");
@@ -58,7 +58,7 @@ public final class Config {
                 else if (k.equals("capacidad")) CAPACIDAD = parseInt(v, CAPACIDAD);
                 else if (k.equals("politica")) POLITICA = v.length() == 0 ? POLITICA : v;
                 else if (k.equals("ui_refresh")) UI_REFRESH_MS = parseInt(v, UI_REFRESH_MS);
-                else if (k.equals("procesos_csv")) PROCESOS_CSV = v.length() == 0 ? PROCESOS_CSV : v;
+                else if (k.equals("procesos_json")) PROCESOS_JSON = v.length() == 0 ? PROCESOS_JSON : v;
             }
         } catch (IOException ignored) {
         } finally {
@@ -80,7 +80,7 @@ public final class Config {
             bw.write("capacidad=" + CAPACIDAD); bw.newLine();
             bw.write("politica=" + POLITICA); bw.newLine();
             bw.write("ui_refresh=" + UI_REFRESH_MS); bw.newLine();
-            bw.write("procesos_csv=" + PROCESOS_CSV); bw.newLine();
+            bw.write("procesos_json=" + PROCESOS_JSON); bw.newLine();
         } catch (IOException ignored) {
         } finally {
             if (bw != null) {

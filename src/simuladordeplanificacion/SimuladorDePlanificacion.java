@@ -23,5 +23,4 @@ public class SimuladorDePlanificacion {
             ventana.setVisible(true);
         });
     }
-    
 }

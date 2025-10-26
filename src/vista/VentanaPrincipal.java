@@ -38,7 +38,8 @@ import control.Kernel;
  */
 public class VentanaPrincipal extends JFrame {
     private final Kernel kernel;
-
+    private final javax.swing.JButton btnGuardar = new javax.swing.JButton("Guardar");
+    private final javax.swing.JButton btnCargar = new javax.swing.JButton("Cargar");
     private final JComboBox<String> cboPolitica = new JComboBox<>(new String[]{"FCFS","SPN","SRT","RR","HRRN","Feedback"});
     private final JSpinner spQuantum = new JSpinner(new SpinnerNumberModel(3, 1, 1000, 1));
     private final JSpinner spDuracion = new JSpinner(new SpinnerNumberModel(500, 10, 5000, 10));
@@ -118,6 +119,8 @@ public class VentanaPrincipal extends JFrame {
         gc.gridx=9; p.add(btnPausar, gc);
         gc.gridx=10; p.add(btnDetener, gc);
         gc.gridx=11; p.add(btnCrear, gc);
+        gc.gridx=12; p.add(btnGuardar, gc);
+        gc.gridx=13; p.add(btnCargar, gc);
         return p;
     }
 
@@ -262,8 +265,36 @@ public class VentanaPrincipal extends JFrame {
         btnPausar.addActionListener(e -> kernel.pausarOContinuar());
         btnDetener.addActionListener(e -> kernel.detener());
         btnCrear.addActionListener(e -> mostrarDialogoCrearProceso());
-    }
+        
+        btnGuardar.addActionListener(e -> {
+            try {
+                io.ArchivoProcesosJSON.guardar(io.Config.PROCESOS_JSON, kernel.snapshotNuevos());
+                javax.swing.JOptionPane.showMessageDialog(this, "Guardado en " + new java.io.File(io.Config.PROCESOS_JSON).getAbsolutePath());
+            } catch (Exception ex) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Error al guardar: " + ex.getMessage());
+            }
+        });
 
+        btnCargar.addActionListener(e -> {
+            try {
+                io.ArchivoProcesosJSON.ProcSpec[] arr = io.ArchivoProcesosJSON.cargar(io.Config.PROCESOS_JSON);
+                int creados = 0;
+                for (int i = 0; i < arr.length; i++) {
+                    io.ArchivoProcesosJSON.ProcSpec s = arr[i];
+                    modelo.Proceso p = kernel.crearProceso(s.nombre, s.tipo, s.total, s.prioridad);
+                    if (s.tipo == modelo.TipoProceso.IO_BOUND) {
+                        p.setIoEntry(s.ioCada);
+                        p.setIoService(s.ioServicio);
+                    }
+                    creados++;
+                }
+                javax.swing.JOptionPane.showMessageDialog(this, "Cargados " + creados + " procesos desde " + io.Config.PROCESOS_JSON);
+            } catch (Exception ex) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Error al cargar: " + ex.getMessage());
+            }
+        });
+    }
+    
     private void iniciarRefresco() {
         int ms = Config.UI_REFRESH_MS <= 0 ? 200 : Config.UI_REFRESH_MS;
         timer = new Timer(ms, e -> refrescar());
@@ -403,8 +434,8 @@ public class VentanaPrincipal extends JFrame {
             int pr = (Integer) spPrio.getValue();
             Proceso p = kernel.crearProceso(nombre, tipo, total, pr);
             if (esIO) {
-                p.setIoCada((Integer) spIoCada.getValue());
-                p.setIoServicio((Integer) spIoServ.getValue());
+                p.setIoEntry((Integer) spIoCada.getValue());
+                p.setIoService((Integer) spIoServ.getValue());
             }
         }
     }

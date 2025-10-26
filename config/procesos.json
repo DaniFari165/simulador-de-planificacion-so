@@ -1,0 +1,8 @@
+[
+  {"nombre":"P452","tipo":"CPU_BOUND","total":20,"prioridad":5,"ioCada":0,"ioServicio":0},
+  {"nombre":"P967","tipo":"CPU_BOUND","total":25,"prioridad":3,"ioCada":0,"ioServicio":0},
+  {"nombre":"P527","tipo":"IO_BOUND","total":20,"prioridad":9,"ioCada":5,"ioServicio":3},
+  {"nombre":"P772","tipo":"IO_BOUND","total":30,"prioridad":3,"ioCada":6,"ioServicio":4},
+  {"nombre":"P57","tipo":"IO_BOUND","total":25,"prioridad":4,"ioCada":4,"ioServicio":2},
+  {"nombre":"P897","tipo":"CPU_BOUND","total":15,"prioridad":6,"ioCada":0,"ioServicio":0}
+]

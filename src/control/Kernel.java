@@ -270,7 +270,7 @@ public class Kernel {
 
     public void asignarCPU(Proceso p) {
         p.marcarInicioSiCorresponde(getCicloActual());
-        EventLog.get().log("DISPATCH pid=" + p.getPid());
+        io.EventLog.get().log("DISPATCH pid=" + p.getPid());
         cpu.asignar(p);
     }
 
@@ -280,15 +280,9 @@ public class Kernel {
             Proceso fin = ev.getProceso();
             fin.marcarCompletion(getCicloActual());
             procesosCompletados++;
-            EventLog.get().log("EXIT pid=" + fin.getPid());
-            colaTerminados.encolar(fin);
-            return ev;
-        }
-        if (ev.getTipo() == ProcesoEvento.Tipo.BLOQUEADO) {
-            EventLog.get().log("BLOCK pid=" + ev.getProceso().getPid() + " io=" + ev.getIoEsperaCiclos());
-            colaBloqueados.bloquear(ev.getProceso(), ev.getIoEsperaCiclos());
-            ioDev.encolarIO(ev.getProceso(), ev.getIoEsperaCiclos(), getDuracionCiclo());
-            return ev;
+            io.EventLog.get().log("EXIT pid=" + fin.getPid());
+        } else if (ev.getTipo() == ProcesoEvento.Tipo.BLOQUEADO) {
+            io.EventLog.get().log("BLOCK pid=" + ev.getProceso().getPid() + " io=" + ev.getIoEsperaCiclos());
         }
         return ev;
     }
@@ -328,9 +322,10 @@ public class Kernel {
 
     public void manejarEvento(ProcesoEvento ev) {
         if (ev.getTipo() == ProcesoEvento.Tipo.TERMINADO) {
+            colaBloqueados.liberarPorPid(ev.getProceso().getPid());
+            colaSuspendidos.retirarPorPid(ev.getProceso().getPid());
             colaTerminados.encolar(ev.getProceso());
         } else if (ev.getTipo() == ProcesoEvento.Tipo.BLOQUEADO) {
-            EventLog.get().log("BLOCK pid=" + ev.getProceso().getPid() + " io=" + ev.getIoEsperaCiclos());
             colaBloqueados.bloquear(ev.getProceso(), ev.getIoEsperaCiclos());
             ioDev.encolarIO(ev.getProceso(), ev.getIoEsperaCiclos(), getDuracionCiclo());
         }
