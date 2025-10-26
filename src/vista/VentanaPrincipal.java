@@ -30,6 +30,9 @@ import modelo.Proceso;
 import io.Config;
 import io.EventLog;
 import control.Kernel;
+import io.SimConfigJSON;
+import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
 
 
 /**
@@ -38,8 +41,7 @@ import control.Kernel;
  */
 public class VentanaPrincipal extends JFrame {
     private final Kernel kernel;
-    private final javax.swing.JButton btnGuardar = new javax.swing.JButton("Guardar");
-    private final javax.swing.JButton btnCargar = new javax.swing.JButton("Cargar");
+
     private final JComboBox<String> cboPolitica = new JComboBox<>(new String[]{"FCFS","SPN","SRT","RR","HRRN","Feedback"});
     private final JSpinner spQuantum = new JSpinner(new SpinnerNumberModel(3, 1, 1000, 1));
     private final JSpinner spDuracion = new JSpinner(new SpinnerNumberModel(500, 10, 5000, 10));
@@ -56,10 +58,10 @@ public class VentanaPrincipal extends JFrame {
     private final JLabel lblMAR = new JLabel("-");
     private final JLabel lblModo = new JLabel("-");
 
-    private final DefaultTableModel modeloNuevos = new DefaultTableModel(new Object[]{"PID","Nombre","Tipo","Total","Prioridad","Estado"}, 0){public boolean isCellEditable(int r,int c){return false;}};
+    private final DefaultTableModel modeloNuevos = new DefaultTableModel(new Object[]{"PID","Nombre","Tipo","Total","Prioridad"}, 0){public boolean isCellEditable(int r,int c){return false;}};
     private final JTable tblNuevos = new JTable(modeloNuevos);
 
-    private final DefaultTableModel modeloListos = new DefaultTableModel(new Object[]{"PID","Nombre","Tipo","Restantes","Total","Prioridad","Estado"}, 0){public boolean isCellEditable(int r,int c){return false;}};
+    private final DefaultTableModel modeloListos = new DefaultTableModel(new Object[]{"PID","Nombre","Tipo","Restantes","Total","Prioridad"}, 0){public boolean isCellEditable(int r,int c){return false;}};
     private final JTable tblListos = new JTable(modeloListos);
 
     private final DefaultTableModel modeloBloq = new DefaultTableModel(new Object[]{"PID","Nombre","Tipo","Restantes","Total","Prioridad","EsperaIO"}, 0){public boolean isCellEditable(int r,int c){return false;}};
@@ -71,8 +73,12 @@ public class VentanaPrincipal extends JFrame {
     private final DefaultTableModel modeloTerminados = new DefaultTableModel(new Object[]{"PID","Nombre","Turnaround","Respuesta","Espera","CPU"}, 0){public boolean isCellEditable(int r,int c){return false;}};
     private final JTable tblTerminados = new JTable(modeloTerminados);
 
-    private final javax.swing.JTextArea txtLog = new javax.swing.JTextArea();
+    private final JTextArea txtLog = new JTextArea();
     private Timer timer;
+
+    private JSplitPane splitTop;
+    private JSplitPane splitBottom;
+    private JSplitPane splitCenter;
 
     public VentanaPrincipal() {
         this(new Kernel());
@@ -91,6 +97,11 @@ public class VentanaPrincipal extends JFrame {
         iniciarRefresco();
         pack();
         setLocationRelativeTo(null);
+        SwingUtilities.invokeLater(() -> {
+            if (splitTop != null) splitTop.setDividerLocation(0.5);
+            if (splitBottom != null) splitBottom.setDividerLocation(0.5);
+            if (splitCenter != null) splitCenter.setDividerLocation(0.5);
+        });
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) { guardarConfig(); }
         });
@@ -119,8 +130,6 @@ public class VentanaPrincipal extends JFrame {
         gc.gridx=9; p.add(btnPausar, gc);
         gc.gridx=10; p.add(btnDetener, gc);
         gc.gridx=11; p.add(btnCrear, gc);
-        gc.gridx=12; p.add(btnGuardar, gc);
-        gc.gridx=13; p.add(btnCargar, gc);
         return p;
     }
 
@@ -160,10 +169,11 @@ public class VentanaPrincipal extends JFrame {
         JPanel nuevos = crearPanelNuevos();
         JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, cpu, nuevos);
         split.setContinuousLayout(true);
-        split.setResizeWeight(0.3);
+        split.setResizeWeight(0.67);
         split.setDividerLocation(0.3);
         cpu.setMinimumSize(new Dimension(260, 180));
         nuevos.setMinimumSize(new Dimension(260, 220));
+        split.setPreferredSize(new Dimension(450, 1));
         return split;
     }
 
@@ -178,11 +188,11 @@ public class VentanaPrincipal extends JFrame {
         right.setBorder(BorderFactory.createTitledBorder("Bloqueados"));
         left.add(new JScrollPane(tblListos), BorderLayout.CENTER);
         right.add(new JScrollPane(tblBloqueados), BorderLayout.CENTER);
-        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, left, right);
-        split.setContinuousLayout(true);
-        split.setResizeWeight(0.6);
-        split.setDividerLocation(0.6);
-        return split;
+        splitTop = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, left, right);
+        splitTop.setContinuousLayout(true);
+        splitTop.setResizeWeight(0.5);
+        splitTop.setDividerLocation(0.5);
+        return splitTop;
     }
 
     private JSplitPane crearSplitBottom() {
@@ -196,21 +206,19 @@ public class VentanaPrincipal extends JFrame {
         right.setBorder(BorderFactory.createTitledBorder("Terminados"));
         left.add(new JScrollPane(tblSuspendidos), BorderLayout.CENTER);
         right.add(new JScrollPane(tblTerminados), BorderLayout.CENTER);
-        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, left, right);
-        split.setContinuousLayout(true);
-        split.setResizeWeight(0.45);
-        split.setDividerLocation(0.45);
-        return split;
+        splitBottom = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, left, right);
+        splitBottom.setContinuousLayout(true);
+        splitBottom.setResizeWeight(0.5);
+        splitBottom.setDividerLocation(0.5);
+        return splitBottom;
     }
 
     private JSplitPane crearSplitCentro() {
-        JSplitPane top = crearSplitTop();
-        JSplitPane bottom = crearSplitBottom();
-        JSplitPane vertical = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bottom);
-        vertical.setContinuousLayout(true);
-        vertical.setResizeWeight(0.58);
-        vertical.setDividerLocation(0.58);
-        return vertical;
+        splitCenter = new JSplitPane(JSplitPane.VERTICAL_SPLIT, crearSplitTop(), crearSplitBottom());
+        splitCenter.setContinuousLayout(true);
+        splitCenter.setResizeWeight(0.5);
+        splitCenter.setDividerLocation(0.5);
+        return splitCenter;
     }
 
     private JPanel crearPanelCentro() {
@@ -229,7 +237,8 @@ public class VentanaPrincipal extends JFrame {
     }
 
     private void inicializarValores() {
-        spDuracion.setValue(Config.DURACION_CICLO_MS);
+        int durJson = SimConfigJSON.cargarDuracion(Config.DURACION_CICLO_MS);
+        spDuracion.setValue(durJson);
         spCapacidad.setValue(Config.CAPACIDAD);
         spQuantum.setValue(Config.QUANTUM);
         seleccionarPolitica(Config.POLITICA);
@@ -259,42 +268,18 @@ public class VentanaPrincipal extends JFrame {
             seleccionarPolitica(v);
         });
         spQuantum.addChangeListener(e -> kernel.setQuantumSiRR((Integer) spQuantum.getValue()));
-        spDuracion.addChangeListener(e -> kernel.setDuracionCiclo((Integer) spDuracion.getValue()));
+        spDuracion.addChangeListener(e -> {
+            int v = (Integer) spDuracion.getValue();
+            kernel.setDuracionCiclo(v);
+            SimConfigJSON.guardarDuracion(v);
+        });
         spCapacidad.addChangeListener(e -> kernel.setCapacidadMemoria((Integer) spCapacidad.getValue()));
         btnIniciar.addActionListener(e -> kernel.iniciar());
         btnPausar.addActionListener(e -> kernel.pausarOContinuar());
         btnDetener.addActionListener(e -> kernel.detener());
         btnCrear.addActionListener(e -> mostrarDialogoCrearProceso());
-        
-        btnGuardar.addActionListener(e -> {
-            try {
-                io.ArchivoProcesosJSON.guardar(io.Config.PROCESOS_JSON, kernel.snapshotNuevos());
-                javax.swing.JOptionPane.showMessageDialog(this, "Guardado en " + new java.io.File(io.Config.PROCESOS_JSON).getAbsolutePath());
-            } catch (Exception ex) {
-                javax.swing.JOptionPane.showMessageDialog(this, "Error al guardar: " + ex.getMessage());
-            }
-        });
-
-        btnCargar.addActionListener(e -> {
-            try {
-                io.ArchivoProcesosJSON.ProcSpec[] arr = io.ArchivoProcesosJSON.cargar(io.Config.PROCESOS_JSON);
-                int creados = 0;
-                for (int i = 0; i < arr.length; i++) {
-                    io.ArchivoProcesosJSON.ProcSpec s = arr[i];
-                    modelo.Proceso p = kernel.crearProceso(s.nombre, s.tipo, s.total, s.prioridad);
-                    if (s.tipo == modelo.TipoProceso.IO_BOUND) {
-                        p.setIoEntry(s.ioCada);
-                        p.setIoService(s.ioServicio);
-                    }
-                    creados++;
-                }
-                javax.swing.JOptionPane.showMessageDialog(this, "Cargados " + creados + " procesos desde " + io.Config.PROCESOS_JSON);
-            } catch (Exception ex) {
-                javax.swing.JOptionPane.showMessageDialog(this, "Error al cargar: " + ex.getMessage());
-            }
-        });
     }
-    
+
     private void iniciarRefresco() {
         int ms = Config.UI_REFRESH_MS <= 0 ? 200 : Config.UI_REFRESH_MS;
         timer = new Timer(ms, e -> refrescar());
@@ -338,8 +323,7 @@ public class VentanaPrincipal extends JFrame {
                 p.getNombre(),
                 p.getTipo()==TipoProceso.CPU_BOUND?"CPU":"IO",
                 p.getTotalInstrucciones(),
-                p.getPrioridad(),
-                p.getEstado()==null?null:p.getEstado().name()
+                p.getPrioridad()
             });
         }
     }
@@ -355,8 +339,7 @@ public class VentanaPrincipal extends JFrame {
                 p.getTipo()==TipoProceso.CPU_BOUND?"CPU":"IO",
                 p.getRestantes(),
                 p.getTotalInstrucciones(),
-                p.getPrioridad(),
-                p.getEstado()==null?null:p.getEstado().name()
+                p.getPrioridad()
             });
         }
     }
@@ -425,8 +408,8 @@ public class VentanaPrincipal extends JFrame {
         cboTipo.setSelectedIndex(0);
         spIoCada.setEnabled(false);
         spIoServ.setEnabled(false);
-        int r = javax.swing.JOptionPane.showConfirmDialog(this, f, "Crear Proceso", javax.swing.JOptionPane.OK_CANCEL_OPTION, javax.swing.JOptionPane.PLAIN_MESSAGE);
-        if (r == javax.swing.JOptionPane.OK_OPTION) {
+        int r = JOptionPane.showConfirmDialog(this, f, "Crear Proceso", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (r == JOptionPane.OK_OPTION) {
             String nombre = txtNombre.getText().trim().length()==0 ? ("P" + System.currentTimeMillis()%1000) : txtNombre.getText().trim();
             boolean esIO = "IO".equals(cboTipo.getSelectedItem());
             TipoProceso tipo = esIO ? TipoProceso.IO_BOUND : TipoProceso.CPU_BOUND;
@@ -447,6 +430,7 @@ public class VentanaPrincipal extends JFrame {
         Object sel = cboPolitica.getSelectedItem();
         Config.POLITICA = sel == null ? "FCFS" : sel.toString();
         Config.guardar();
+        SimConfigJSON.guardarDuracion((Integer) spDuracion.getValue());
     }
 
     public static void main(String[] args) {
