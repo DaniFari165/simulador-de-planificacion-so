@@ -9,7 +9,7 @@ import modelo.Proceso;
 
 /**
  *
- * @author 58412
+ * @author Daniel Fariña
  */
 public class ColaProceso {
     private static final class Nodo {

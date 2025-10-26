@@ -6,7 +6,7 @@ package modelo;
 
 /**
  *
- * @author 58412
+ * @author Carlos De Freitas
  */
 public enum EstadoProceso {
     NUEVO,

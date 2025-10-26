@@ -8,7 +8,7 @@ import java.util.function.BiConsumer;
 
 /**
  *
- * @author 58412
+ * @author Daniel Fariña
  */
 public class RelojGlobal extends Thread {
     private volatile int cicloActual = 0;

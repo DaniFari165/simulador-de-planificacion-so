@@ -8,7 +8,7 @@ import java.util.concurrent.Semaphore;
 
 /**
  *
- * @author 58412
+ * @author Daniel Fariña
  */
 public class CPU {
     private final Semaphore mutex = new Semaphore(1);

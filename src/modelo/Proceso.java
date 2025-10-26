@@ -6,7 +6,7 @@ package modelo;
 import java.util.concurrent.Semaphore;
 /**
  *
- * @author 58412
+ * @author Carlos De Freitas
  */
 public class Proceso extends Thread{
     

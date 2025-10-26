@@ -9,7 +9,7 @@ import modelo.ProcesoEvento;
 
 /**
  *
- * @author 58412
+ * @author Daniel Fariña
  */
 public class FCFS implements Scheduler {
     public void onTick(Kernel k) {

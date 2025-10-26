@@ -12,7 +12,7 @@ import modelo.ProcesoEvento;
 
 /**
  *
- * @author Usuario
+ * @author Carlos De Freitas
  */
 public class SRT implements Scheduler{
     public void onTick(Kernel k) {

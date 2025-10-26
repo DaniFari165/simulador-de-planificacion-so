@@ -9,7 +9,7 @@ import modelo.Proceso;
 import modelo.ProcesoEvento; 
 /**
  *
- * @author Usuario
+ * @author Carlos De Freitas
  */
 public class HRRN implements Scheduler {
     

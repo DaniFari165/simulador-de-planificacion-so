@@ -9,7 +9,7 @@ import modelo.Proceso;
 import modelo.TipoProceso;
 /**
  *
- * @author 58412
+ * @author Daniel Fariña
  */
 public final class ArchivoProcesosJSON {
 

@@ -12,7 +12,7 @@ import modelo.EstadoProceso;
 
 /**
  *
- * @author 58412
+ * @author Carlos De Freitas
  */
 public class RoundRobin implements Scheduler {
     

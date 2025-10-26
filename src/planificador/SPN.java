@@ -9,7 +9,7 @@ import modelo.ProcesoEvento;
 
 /**
  *
- * @author Usuario
+ * @author Carlos De Freitas
  */
 public class SPN implements Scheduler {
     

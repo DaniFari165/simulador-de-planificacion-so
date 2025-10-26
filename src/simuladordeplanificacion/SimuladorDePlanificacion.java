@@ -10,7 +10,7 @@ import vista.VentanaPrincipal;
 
 /**
  *
- * @author 58412
+ * @author Daniel Fariña
  */
 public class SimuladorDePlanificacion {
 

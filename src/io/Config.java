@@ -13,7 +13,7 @@ import java.io.IOException;
 
 /**
  *
- * @author 58412
+ * @author Daniel Fariña
  */
 public final class Config {
 

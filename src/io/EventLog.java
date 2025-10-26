@@ -10,7 +10,7 @@ import java.io.IOException;
 
 /**
  *
- * @author 58412
+ * @author Daniel Fariña
  */
 public final class EventLog {
     private static final EventLog INSTANCE = new EventLog();

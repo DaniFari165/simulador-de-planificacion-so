@@ -6,7 +6,7 @@ package modelo;
 
 /**
  *
- * @author Usuario
+ * @author Carlos De Freitas
  */
 public class ProcesoEvento {
     

@@ -8,7 +8,7 @@ import control.Kernel;
 
 /**
  *
- * @author 58412
+ * @author Daniel Fariña
  */
 public interface Scheduler {
     void onTick(Kernel k);

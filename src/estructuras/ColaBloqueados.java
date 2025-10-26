@@ -4,14 +4,12 @@
  */
 package estructuras;
 
-import java.util.concurrent.locks.ReentrantLock;
 import modelo.EstadoProceso;
 import modelo.Proceso;
-import modelo.TipoProceso;
 
 /**
  *
- * @author 58412
+ * @author Daniel Fariña
  */
 public class ColaBloqueados {
     private static final class Nodo {

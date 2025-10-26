@@ -12,7 +12,7 @@ import io.*;
 
 /**
  *
- * @author 58412
+ * @author Daniel Fariña
  */
 public class Kernel {
     private RelojGlobal reloj = new RelojGlobal();
