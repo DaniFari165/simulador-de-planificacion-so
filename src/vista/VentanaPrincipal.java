@@ -32,6 +32,7 @@ import io.EventLog;
 import control.Kernel;
 import io.SimConfigJSON;
 import javax.swing.JOptionPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
 
@@ -79,6 +80,9 @@ public class VentanaPrincipal extends JFrame {
     private JSplitPane splitTop;
     private JSplitPane splitBottom;
     private JSplitPane splitCenter;
+    private JTabbedPane tabs;
+    private JPanel tabColas;
+    private GraficasPanel tabGraficas;
 
     public VentanaPrincipal() {
         this(new Kernel());
@@ -109,7 +113,12 @@ public class VentanaPrincipal extends JFrame {
 
     private void construirUI() {
         add(crearPanelControles(), BorderLayout.NORTH);
-        add(crearPanelCentro(), BorderLayout.CENTER);
+        tabs = new JTabbedPane();
+        tabColas = crearPanelCentro();
+        tabGraficas = new GraficasPanel(kernel);
+        tabs.addTab("Colas", tabColas);
+        tabs.addTab("Gráficas", tabGraficas);
+        add(tabs, BorderLayout.CENTER);
         add(crearPanelLog(), BorderLayout.SOUTH);
     }
 
@@ -311,6 +320,7 @@ public class VentanaPrincipal extends JFrame {
         for (int i = 0; i < lines.length; i++) sb.append(lines[i]).append('\n');
         txtLog.setText(sb.toString());
         txtLog.setCaretPosition(txtLog.getDocument().getLength());
+        tabGraficas.refrescar();
     }
 
     private void cargarNuevos() {
