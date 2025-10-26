@@ -8,7 +8,6 @@ import java.util.function.BiConsumer;
 import estructuras.*;
 import modelo.*;
 import planificador.*;
-import io.*;
 
 /**
  *
@@ -16,6 +15,7 @@ import io.*;
  */
 public class Kernel {
     private RelojGlobal reloj = new RelojGlobal();
+
     private ColaProceso colaNuevos = new ColaProceso();
     private ColaProceso colaListos = new ColaProceso();
     private ColaProceso colaTerminados = new ColaProceso();
@@ -34,26 +34,25 @@ public class Kernel {
 
     private int capacidadMemoria = 4;
 
-    private IODevice ioDev = new IODevice(this);
+    private final Metricas metricas = new Metricas(50, 300);
 
     public Kernel() {
         BiConsumer<Integer,Long> tick = (ciclo, ts) -> {
             if (cpu.estaLibre() && colaListos.esVacia() && colaBloqueados.esVacia() && colaNuevos.esVacia() && colaSuspendidos.esVacia()) {
                 ciclosTotales++;
+                metricas.onTick(false);
                 return;
             }
             planificador.onTick(this);
             admitirNuevosSiHayMemoria();
             reactivarSuspendidosSiHayMemoria();
             acumularEsperaEnListos();
-            colaBloqueados.decrementarUnCiclo();
             ciclosTotales++;
             if (!cpu.estaLibre()) ciclosCpuOcupada++;
+            metricas.onTick(!cpu.estaLibre());
             forzarSuspensionSiOverflow();
         };
         reloj.addListener(tick);
-        ioDev.start();
-        EventLog.get().log("Kernel iniciado; planificador=" + nombrePlanificador());
     }
 
     public void addTickListener(BiConsumer<Integer,Long> l) {
@@ -77,7 +76,6 @@ public class Kernel {
             Proceso p = colaNuevos.desencolar();
             p.setEstado(EstadoProceso.LISTO);
             colaListos.encolar(p);
-            EventLog.get().log("ADMIT pid=" + p.getPid());
         }
     }
 
@@ -88,7 +86,6 @@ public class Kernel {
             if (procesosEnMemoria() < capacidadMemoria) {
                 p.setEstado(EstadoProceso.LISTO);
                 colaListos.encolar(p);
-                EventLog.get().log("RESUME pid=" + p.getPid());
             } else {
                 colaSuspendidos.suspenderListo(p);
             }
@@ -97,7 +94,6 @@ public class Kernel {
             Proceso p = colaSuspendidos.reactivarListo();
             if (p == null) break;
             colaListos.encolar(p);
-            EventLog.get().log("RESUME pid=" + p.getPid());
         }
     }
 
@@ -105,7 +101,6 @@ public class Kernel {
         while (procesosEnMemoria() > capacidadMemoria && !colaListos.esVacia()) {
             Proceso victima = colaListos.desencolar();
             colaSuspendidos.suspenderListo(victima);
-            EventLog.get().log("SUSPEND pid=" + victima.getPid());
         }
     }
 
@@ -140,49 +135,41 @@ public class Kernel {
             BiConsumer<Integer,Long> tick = (c, ts) -> {
                 if (cpu.estaLibre() && colaListos.esVacia() && colaBloqueados.esVacia() && colaNuevos.esVacia() && colaSuspendidos.esVacia()) {
                     ciclosTotales++;
+                    metricas.onTick(false);
                     return;
                 }
                 planificador.onTick(this);
                 admitirNuevosSiHayMemoria();
                 reactivarSuspendidosSiHayMemoria();
                 acumularEsperaEnListos();
-                colaBloqueados.decrementarUnCiclo();
                 ciclosTotales++;
                 if (!cpu.estaLibre()) ciclosCpuOcupada++;
+                metricas.onTick(!cpu.estaLibre());
                 forzarSuspensionSiOverflow();
             };
             reloj.addListener(tick);
             reloj.iniciar();
-            if (!ioDev.isAlive()) {
-                ioDev = new IODevice(this);
-                ioDev.start();
-            }
         }
     }
 
     public void pausarOContinuar() {
-        if (!reloj.isAlive()) {
-            return;
-        }
-        if (reloj.isPausado()) {
-            reloj.continuar();
-        } else {
-            reloj.pausar();
-        }
+        if (!reloj.isAlive()) return;
+        if (reloj.isPausado()) reloj.continuar(); else reloj.pausar();
     }
 
     public void detener() {
-        if (reloj != null && reloj.isAlive()) {
-            reloj.detener();
-        }
-        if (ioDev != null) {
-            ioDev.detener();
-        }
-        EventLog.get().log("Kernel detenido");
+        if (reloj != null && reloj.isAlive()) reloj.detener();
     }
-    public void setDuracionCiclo(int ms) { reloj.setDuracionCiclo(ms); }
-    public int getDuracionCiclo() { return reloj.getDuracionCiclo(); }
-    public int getCicloActual() { return reloj.getCicloActual(); }
+
+    public void setDuracionCiclo(int ms) {
+        reloj.setDuracionCiclo(ms);
+    }
+    public int getDuracionCiclo() {
+        return reloj.getDuracionCiclo();
+    }
+    public int getCicloActual() {
+        return reloj.getCicloActual();
+    }
 
     public void reiniciarSimulacion() {
         detener();
@@ -200,21 +187,19 @@ public class Kernel {
         BiConsumer<Integer,Long> tick = (ciclo, ts) -> {
             if (cpu.estaLibre() && colaListos.esVacia() && colaBloqueados.esVacia() && colaNuevos.esVacia() && colaSuspendidos.esVacia()) {
                 ciclosTotales++;
+                metricas.onTick(false);
                 return;
             }
             planificador.onTick(this);
             admitirNuevosSiHayMemoria();
             reactivarSuspendidosSiHayMemoria();
             acumularEsperaEnListos();
-            colaBloqueados.decrementarUnCiclo();
             ciclosTotales++;
             if (!cpu.estaLibre()) ciclosCpuOcupada++;
+            metricas.onTick(!cpu.estaLibre());
             forzarSuspensionSiOverflow();
         };
         reloj.addListener(tick);
-        ioDev = new IODevice(this);
-        ioDev.start();
-        EventLog.get().log("Kernel reiniciado; planificador=" + nombrePlanificador());
     }
 
     public Proceso crearProceso(String nombre, TipoProceso tipo, int totalInstr) {
@@ -228,7 +213,6 @@ public class Kernel {
         p.setArrivalCiclo(getCicloActual());
         p.start();
         colaNuevos.encolar(p);
-        EventLog.get().log("CREATE pid=" + p.getPid() + " tipo=" + p.getTipo().name() + " total=" + totalInstr + " prio=" + prioridad);
         return p;
     }
 
@@ -280,6 +264,8 @@ public class Kernel {
             Proceso fin = ev.getProceso();
             fin.marcarCompletion(getCicloActual());
             procesosCompletados++;
+            int resp = (fin.getStartCiclo()>=0 && fin.getArrivalCiclo()>=0) ? (fin.getStartCiclo()-fin.getArrivalCiclo()) : 0;
+            metricas.onProcesoTerminado(resp);
             io.EventLog.get().log("EXIT pid=" + fin.getPid());
         } else if (ev.getTipo() == ProcesoEvento.Tipo.BLOQUEADO) {
             io.EventLog.get().log("BLOCK pid=" + ev.getProceso().getPid() + " io=" + ev.getIoEsperaCiclos());
@@ -288,11 +274,7 @@ public class Kernel {
     }
 
     public Proceso preemptarCPU() {
-        Proceso prev = cpu.preempt();
-        if (prev != null) {
-            EventLog.get().log("PREEMPT pid=" + prev.getPid());
-        }
-        return prev;
+        return cpu.preempt();
     }
 
     public Proceso peekListoMinRestantes() {
@@ -321,18 +303,33 @@ public class Kernel {
     public Proceso desencolarListoMinPrioridad() { return colaListos.retirarMinPorPrioridad(); }
 
     public void manejarEvento(ProcesoEvento ev) {
-        if (ev.getTipo() == ProcesoEvento.Tipo.TERMINADO) {
-            colaBloqueados.liberarPorPid(ev.getProceso().getPid());
-            colaSuspendidos.retirarPorPid(ev.getProceso().getPid());
-            colaTerminados.encolar(ev.getProceso());
-        } else if (ev.getTipo() == ProcesoEvento.Tipo.BLOQUEADO) {
-            colaBloqueados.bloquear(ev.getProceso(), ev.getIoEsperaCiclos());
-            ioDev.encolarIO(ev.getProceso(), ev.getIoEsperaCiclos(), getDuracionCiclo());
+        switch (ev.getTipo()) {
+            case TERMINADO -> {
+                colaBloqueados.liberarPorPid(ev.getProceso().getPid());
+                colaSuspendidos.retirarPorPid(ev.getProceso().getPid());
+                colaTerminados.encolar(ev.getProceso());
+            }
+            case BLOQUEADO -> {
+                if (procesosEnMemoria() < capacidadMemoria) {
+                    colaBloqueados.bloquear(ev.getProceso(), ev.getIoEsperaCiclos());
+                } else {
+                    colaSuspendidos.suspenderBloqueado(ev.getProceso(), ev.getIoEsperaCiclos());
+                }
+            }
+            case NINGUNO -> {}
         }
     }
 
     public void liberarBloqueadosAListos() {
-        colaBloqueados.decrementarUnCiclo();
+        Proceso[] libres = colaBloqueados.avanzarUnCicloYLiberar();
+        for (int i = 0; i < libres.length; i++) {
+            Proceso p = libres[i];
+            if (procesosEnMemoria() < capacidadMemoria) {
+                colaListos.encolar(p);
+            } else {
+                colaSuspendidos.suspenderListo(p);
+            }
+        }
     }
 
     public void ioCompleto(Proceso p) {
@@ -341,13 +338,15 @@ public class Kernel {
         if (procesosEnMemoria() < capacidadMemoria) {
             p.setEstado(EstadoProceso.LISTO);
             colaListos.encolar(p);
-            EventLog.get().log("UNBLOCK pid=" + p.getPid());
         } else {
             colaSuspendidos.suspenderListo(p);
-            EventLog.get().log("UNBLOCK->SUSP pid=" + p.getPid());
         }
     }
 
+    public void ioCompleto(int pid) {
+        colaBloqueados.liberarPorPid(pid);
+    }
+    
     public long getCiclosTotales() {
         return ciclosTotales;
     }
@@ -363,10 +362,16 @@ public class Kernel {
         return "ciclosTotales=" + ciclosTotales + ";cpuOcupada=" + ciclosCpuOcupada + ";usoCpu=" + String.format("%.2f", usoCpu) + "%;terminados=" + procesosCompletados;
     }
 
-    public int getCapacidadMemoria() {
-        return capacidadMemoria;
+    public int getCapacidadMemoria() { return capacidadMemoria; }
+    public void setCapacidadMemoria(int cap) { this.capacidadMemoria = Math.max(1, cap); }
+
+    public double[] serieUsoCPU() {
+        return metricas.getUso();
     }
-    public void setCapacidadMemoria(int cap) {
-        this.capacidadMemoria = Math.max(1, cap);
+    public double[] serieThroughput() {
+        return metricas.getThroughput();
+    }
+    public double[] serieRespProm() {
+        return metricas.getRespProm();
     }
 }
