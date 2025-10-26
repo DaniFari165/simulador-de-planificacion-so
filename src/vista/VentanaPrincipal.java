@@ -34,7 +34,7 @@ import control.Kernel;
 
 /**
  *
- * @author 58412
+ * @author Daniel Fariña
  */
 public class VentanaPrincipal extends JFrame {
     private final Kernel kernel;
